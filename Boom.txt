@@ -1,0 +1,105 @@
+In this project, you will get experience using a sophisticated code.  In
+particular, you will use the Fortran-based code hydro1d, developed by Stony
+Brook physics & astronomy professor Mike Zingale.  You will use this code to
+model a simple explosion.
+
+To complete this project, do each of the following:
+
+1) Get the code.
+
+To do this, at the command line execute
+
+$ git clone https://github.com/zingale/hydro1d
+
+This will download the code and put it into a new directory called "hydro1d"
+
+2) Build the code's Sod problem.
+
+Scientific code is often distributed as a set of what we call source files.  In
+other words, files that contain the source code used by the compiler to generate
+machine code the computer understands.  Since we do not have the machine code,
+we have to build it.  For simple Fortran programs in one file, we just did
+something like
+
+$ gfortran my_program.f90
+
+This would take the source code my_program.f90 and build it into machine code in
+the executable file a.out.
+
+For sophisticated codes, building tends to be more complex.  To build the Sod
+problem code, change into the "sod" directory, which is in the hydro1d directory
+we created in the first part of the project.  Once in that directory, you can
+build the executable using the make command.  Simply do
+
+$ make
+
+3) Oh no!  Errors!  It turns out that when we attempt to build the code we get
+errors.  You should see something like the following:
+
+$ make
+../Ghydro.mak:24: _build/deps: No such file or directory
+../util/dep.py --prefix _build/  --search_path ". ../" bcs.f90 constants.f90 datatypes.f90 dt.f90 eigen.f90 eigen_T.f90 eos.f90 flatten.f90 godunov.f90 gravity.f90 grid.f90 init.f90 main.f90 output.f90 params.f90 plm.f90 ppm.f90 ppm_T.f90 probparams.f90 riemann.f90 run_diag.f90 update.f90 user_bc.f90 variables.f90 > _build/deps
+Traceback (most recent call last):
+  File "../util/dep.py", line 93, in <module>
+    doit(args.prefix, args.search_path.split(), args.files)
+  File "../util/dep.py", line 38, in doit
+    full_file = "{}/{}".format(p, cf)
+ValueError: zero length field name in format
+make: *** [_build/deps] Error 1
+$ 
+
+Unexpected errors are common when using another's code.  Your goal for this part
+of the project is to fix the errors in the source code until you can
+successfully build the sod problem.  If you fix the errors, building the code
+will look something like this:
+
+$ make
+../Ghydro.mak:24: _build/deps: No such file or directory
+../util/dep.py --prefix _build/  --search_path ". ../" bcs.f90 constants.f90 datatypes.f90 dt.f90 eigen.f90 eigen_T.f90 eos.f90 flatten.f90 godunov.f90 gravity.f90 grid.f90 init.f90 main.f90 output.f90 params.f90 plm.f90 ppm.f90 ppm_T.f90 probparams.f90 riemann.f90 run_diag.f90 update.f90 user_bc.f90 variables.f90 > _build/deps
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/datatypes.o ../datatypes.f90 
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/grid.o ../grid.f90 
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/variables.o ../variables.f90 
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/params.o ../params.f90 
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/constants.o ../constants.f90 
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/eos.o ../eos.f90 
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/user_bc.o ../user_bc.f90 
+../user_bc.f90:21.25:
+
+  subroutine user_bc_xp(U)
+                         1
+Warning: Unused dummy argument 'u' at (1)
+=====
+NOTE: There will be many similar lines, which I'll skip here.
+Eventually, we get:
+=====
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/update.o ../update.f90 
+gfortran -c -O2 -g -fbounds-check -fbacktrace -Wuninitialized -Wunused -ffpe-trap=invalid -finit-real=nan -J _build -I _build -o _build/main.o ../main.f90 
+ 
+Linking...
+gfortran -o hydro1d _build/bcs.o _build/constants.o _build/datatypes.o _build/dt.o _build/eigen.o _build/eigen_T.o _build/eos.o _build/flatten.o _build/godunov.o _build/gravity.o _build/grid.o _build/init.o _build/main.o _build/output.o _build/params.o _build/plm.o _build/ppm.o _build/ppm_T.o _build/probparams.o _build/riemann.o _build/run_diag.o _build/update.o _build/user_bc.o _build/variables.o
+$ 
+
+Now if you do an `ls` you should see an executable file called hydro1d.
+
+4) Now that we have the executable, execute it!  To do the sod problem, we type
+
+$ ./hydro1d inputs-sod-xm
+
+which should give output like:
+
+ reading parameters from inputs-sod-xm
+ reading problem-specific parameters from inputs-sod-xm
+           1  5.28221409205322911E-003  5.28221409205322911E-003
+           2  8.94711954660053557E-003  3.66490545454730733E-003
+           3  1.20011455498536396E-002  3.05402600325310313E-003
+          < similar output for several lines>
+          64  0.18521895410571873       2.84466548507070552E-003
+          65  0.18806381825075946       2.84486414504072369E-003
+          66  0.19090876821501288       2.84494996425340048E-003
+          67  0.19375370694243760       2.84493872742471073E-003
+          68  0.19659862743677023       2.84492049433262119E-003
+          69  0.19944345482019921       2.84482738342898851E-003
+          70  0.20000000000000001       5.56545179800804757E-004
+
+5) If there's time, work with an instructor to learn how to plot this output and
+compare your numerical results with exact results.  Why might they differ?
